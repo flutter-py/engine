@@ -1,9 +1,44 @@
 import os
 from pathlib import Path
+from platform import system
+import subprocess
 
 __all__ = (
     'get_flutter_version',
 )
+
+
+def guess_sdk_path() -> str:
+    """Attempts to guess the Flutter SDK path.
+
+    This will use the command line and call ``where.exe flutter``/
+    ``which flutter`` to get the path for the Flutter SDK which
+    can then be passed to :func:`read_version_from_sdk` to read
+    the Flutter engine version.
+
+    Returns
+    -------
+    str
+        The path to the Flutter SDK.
+
+    Raises
+    ------
+    :exc:`OSError`
+        The SDK was not found.
+    """
+
+    if system() == 'Windows':
+        process = subprocess.Popen(
+            'where.exe flutter', shell=True, stdout=subprocess.PIPE)
+    else:
+        process = subprocess.Popen(
+            'which flutter', shell=True, stdout=subprocess.PIPE)
+
+    out, err = process.communicate()
+    if err:
+        raise OSError('Failed to retrieve the SDK path')
+
+    return out.strip()
 
 
 def read_version_from_sdk(path: str) -> str:
@@ -79,6 +114,5 @@ def get_flutter_version() -> str:
     # As a last resort, try to get the version through CLI
     # by guessing the path through `where.exe/which flutter`
     # and calling read_version_from_sdk with the resulting path.
-    # TODO: Implement this.
-
-    raise OSError('Failed to read the Flutter version') from None
+    guessed_path = guess_sdk_path()
+    return read_version_from_sdk(guessed_path)

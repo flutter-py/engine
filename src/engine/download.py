@@ -45,9 +45,11 @@ class Target(Enum):
         else:
             raise TypeError('Unsupported target')
 
-        base_url = os.getenv('FLUTTER_STORAGE_BASE_URL', 'https://storage.googleapis.com')
+        base_url = os.getenv(
+            'FLUTTER_STORAGE_BASE_URL', 'https://storage.googleapis.com')
 
-        return '{}/flutter_infra/flutter/{}/{}'.format(base_url, version, target)
+        return '{}/flutter_infra/flutter/{}/{}'.format(
+            base_url, version, target)
 
     @property
     def library_name(self) -> str:
@@ -150,7 +152,9 @@ def download_engine(version: str, output: str):
     try:
         target = Target.get()
     except ValueError:
-        raise RuntimeError('Cannot retrieve the target. Please set the TARGET environment variable')
+        raise RuntimeError(
+            'Cannot retrieve the target.'
+            'Please set the TARGET environment variable')
     
     # Download the engine and write the results to the output file.
     response = requests.get(target.get_download_url(version), stream=True)
