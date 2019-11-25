@@ -120,7 +120,7 @@ def unzip(file: str, destination: str):
             f.extract(name, destination)
 
 
-def download_engine(version: str, output: str):
+def download_engine(version: str, output: str) -> str:
     """Downloads the Flutter engine.
 
     This requires the ``TARGET`` environment variable so
@@ -135,7 +135,12 @@ def download_engine(version: str, output: str):
         The engine version to download.
     output : str
         Path to the file where the result should be written.
-    
+
+    Returns
+    -------
+    str
+        The name of the engine file.
+
     Raises
     ------
     :exc:`RuntimeError`
@@ -144,9 +149,8 @@ def download_engine(version: str, output: str):
     """
 
     # Make sure the specified path exists.
-    output_parent, _ = os.path.split(output)
-    if not os.path.exists(output_parent):
-        os.makedirs(output_parent)
+    if not os.path.exists(output):
+        os.makedirs(output)
     
     # Determine the target.
     try:
@@ -161,17 +165,18 @@ def download_engine(version: str, output: str):
     if response.status_code != 200:
         raise RuntimeError('Failed to download the Flutter engine')
 
-    with open(output, 'wb') as f:
+    with open('engine.zip', 'wb') as f:
         for chunk in response.iter_content(1024):
             f.write(chunk)
     
     # Extract the downloaded archive.
-    unzip(output, output_parent)
+    unzip('engine.zip', os.path.join(output, target.library_name))
 
     if target == Target.MACOS:
         # macOS download is a double zip file.
-        library = target.library_name
         unzip(
-            os.path.join(output_parent, library + '.zip'),
-            os.path.join(output_parent, library)
+            os.path.join(output, target.library_name + '.zip'),
+            os.path.join(output, target.library_name)
         )
+
+    return target.library_name
