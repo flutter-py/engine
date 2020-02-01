@@ -2,12 +2,12 @@
 flutter_engine
 ~~~~~~~~~~~~~~
 
-Python interface to the Flutter engine.
+Python bindings to the Flutter engine.
 
 :copyright: (c) 2019 Valentin B.
 :license: Apache-2.0/MIT, see LICENSE for details.
 """
 
-from .download import *
+from .bindings import build
+
 from .meta import *
-from .version import *
