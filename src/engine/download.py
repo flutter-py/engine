@@ -157,9 +157,9 @@ def download_engine(version: str, output: str) -> str:
         target = Target.get()
     except ValueError:
         raise RuntimeError(
-            'Cannot retrieve the target.'
+            'Cannot retrieve the target. '
             'Please set the TARGET environment variable')
-    
+
     # Download the engine and write the results to the output file.
     response = requests.get(target.get_download_url(version), stream=True)
     if response.status_code != 200:
@@ -168,15 +168,22 @@ def download_engine(version: str, output: str) -> str:
     with open('engine.zip', 'wb') as f:
         for chunk in response.iter_content(1024):
             f.write(chunk)
-    
+
     # Extract the downloaded archive.
     unzip('engine.zip', os.path.join(output, target.library_name))
 
+    # We don't need the zip archive anymore. Delete it.
+    if os.path.exists('engine.zip'):
+        os.remove('engine.zip')
+
+    # macOS download is a doubly zipped file that
+    # needs to be extracted a second time.
     if target == Target.MACOS:
-        # macOS download is a double zip file.
+        library = target.library_name
         unzip(
-            os.path.join(output, target.library_name + '.zip'),
-            os.path.join(output, target.library_name)
+            os.path.join(
+                os.path.join(output, library), library + '.zip'),
+                os.path.join(output, library)
         )
 
     return target.library_name
